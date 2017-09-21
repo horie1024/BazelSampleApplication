@@ -4,20 +4,29 @@ jobs:
     working_directory: ~/code
     docker:
       - image: circleci/android:api-26-alpha
+    environment:
+      - ANDROID_HOME: /opt/android/sdk
     steps:
       - checkout
       - run:
+          command: export WORKSPACE=`pwd`
+      - run:
+          command: |
+            echo [ANDROID_SDK_LICENSE] >> $ANDROID_HOME/licenses/android-sdk-license
+            echo y | android update sdk --no-ui --all --filter "extra-android-m2repository,extra-google-m2repository"
+      - run:
           name: Download Dependencies
-          command: 
-            - sudo apt-get install openjdk-8-jdk
-            - echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-            - curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
-            - sudo apt-get update && sudo apt-get install bazel
-            - sudo apt-get upgrade bazel
+          command: | 
+              sudo apt-get install openjdk-8-jdk
+              echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+              curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
+              sudo apt-get update && sudo apt-get install bazel
+              sudo apt-get upgrade bazel
       - run:
           name: Run Tests
           command: bazel test //app/src:example_kt_test
       - run:
           name: Run build
-          command: sudo -E bazel build //app/src:app
-
+          command: |
+              bazel query @androidsdk//...
+              sudo -E bazel build //app/src:app
