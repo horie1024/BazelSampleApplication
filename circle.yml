@@ -27,6 +27,4 @@ jobs:
           command: bazel test //app/src:example_kt_test
       - run:
           name: Run build
-          command: |
-              bazel query @androidsdk//...
-              sudo -E bazel build //app/src:app
+          command: sudo -E bazel build //app/src:app
