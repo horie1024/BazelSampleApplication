@@ -1,0 +1,23 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/code
+    docker:
+      - image: circleci/android:api-26-alpha
+    steps:
+      - checkout
+      - run:
+          name: Download Dependencies
+          command: 
+            - sudo apt-get install openjdk-8-jdk
+            - echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+            - curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
+            - sudo apt-get update && sudo apt-get install bazel
+            - sudo apt-get upgrade bazel
+      - run:
+          name: Run Tests
+          command: bazel test //app/src:example_kt_test
+      - run:
+          name: Run build
+          command: sudo -E bazel build //app/src:app
+
